@@ -84,9 +84,12 @@ The workflow ([`.github/workflows/digest.yml`](.github/workflows/digest.yml)) ru
 **06:00 UTC** and is also runnable on demand via **Run workflow**.
 
 ### Option B — Local (macOS launchd)
+The plist ships with a `__PROJECT_DIR__` placeholder — fill it with your absolute project
+path on install:
 ```bash
-ln -sf "$PWD/com.mrdi.newsvibe.plist" ~/Library/LaunchAgents/com.mrdi.newsvibe.plist
-launchctl load ~/Library/LaunchAgents/com.mrdi.newsvibe.plist
+sed "s|__PROJECT_DIR__|$PWD|" com.newsvibe.digest.plist \
+  > ~/Library/LaunchAgents/com.newsvibe.digest.plist
+launchctl load ~/Library/LaunchAgents/com.newsvibe.digest.plist
 ```
 Runs daily at 08:00 local; `StartCalendarInterval` catches up missed runs after sleep.
 

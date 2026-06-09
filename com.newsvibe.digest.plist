@@ -2,11 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-  <key>Label</key><string>com.mrdi.newsvibe</string>
+  <key>Label</key><string>com.newsvibe.digest</string>
   <key>ProgramArguments</key>
   <array>
     <string>/bin/bash</string>
-    <string>/Volumes/X10 Pro/projects/news_vibe_coding/run_digest.sh</string>
+    <!-- Замени __PROJECT_DIR__ на абсолютный путь к корню проекта.
+         Проще через sed при установке — см. README, секция launchd. -->
+    <string>__PROJECT_DIR__/run_digest.sh</string>
   </array>
   <key>StartCalendarInterval</key>
   <dict>
@@ -21,9 +23,9 @@
     <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
   </dict>
   <key>StandardOutPath</key>
-  <string>/tmp/com.mrdi.newsvibe.log</string>
+  <string>/tmp/com.newsvibe.digest.log</string>
   <key>StandardErrorPath</key>
-  <string>/tmp/com.mrdi.newsvibe.log</string>
+  <string>/tmp/com.newsvibe.digest.log</string>
   <key>RunAtLoad</key><false/>
 </dict>
 </plist>

@@ -8,7 +8,7 @@
 
 **Tech Stack:** bash, `curl` (Telegram Bot API), `claude` CLI (headless), macOS `launchd`. Зависимость для самого сбора — установленный скилл `mvanhorn/last30days-skill` (+ его тулзы: `yt-dlp`, node — для YouTube/прочего).
 
-**Важно про пути:** корень проекта `/Volumes/X10 Pro/projects/news_vibe_coding` содержит пробел. Все пути в скриптах ОБЯЗАТЕЛЬНО в кавычках (`"$DIR"`, `"$OUTDIR"`).
+**Важно про пути:** если путь к проекту содержит пробел, все пути в скриптах ОБЯЗАТЕЛЬНО в кавычках (`"$DIR"`, `"$OUTDIR"`).
 
 **Отклонения от спеки (зона технических решений):**
 - `config.yaml` → `config.sh` (sourceable bash-массив) — без зависимости `yq`.
@@ -24,7 +24,7 @@
 | `lib.sh` | Чистые функции: `aggregate_daily`, `tg_send_message`, `tg_send_document`, `run_all`, дефолтный `run_topic`. Без побочной сети при `DRY_RUN=1`. |
 | `run_digest.sh` | Entrypoint: грузит `.env`+config+lib, fail-fast по токену, цикл тем (реальный `run_topic` через `claude`), агрегация, доставка. |
 | `notify_telegram.sh` | Отдельный reusable-скрипт отправки `_daily.md` в Telegram (вызывается из `run_digest.sh` и вручную). |
-| `com.mrdi.newsvibe.plist` | launchd-агент, ежедневно 08:00. |
+| `com.newsvibe.digest.plist` | launchd-агент, ежедневно 08:00. |
 | `.env.example` | Шаблон секретов (token, chat id). |
 | `tests/lib.sh` | Assert-хелперы. |
 | `tests/test_*.sh` | 4 теста (config, aggregate, telegram dry-run, partial failure). |
@@ -92,7 +92,7 @@ Expected: `PASS: tests/test_smoke.sh`
 - [ ] **Step 4: Commit**
 
 ```bash
-cd "/Volumes/X10 Pro/projects/news_vibe_coding"
+cd "~/news_vibe_coding"
 git add tests/lib.sh tests/test_smoke.sh
 git commit -m "test: add bash assert helpers and smoke test"
 ```
@@ -554,24 +554,24 @@ git commit -m "feat: add run_digest entrypoint and Telegram notifier"
 
 ---
 
-## Task 7: launchd-агент (`com.mrdi.newsvibe.plist`)
+## Task 7: launchd-агент (`com.newsvibe.digest.plist`)
 
 **Files:**
-- Create: `com.mrdi.newsvibe.plist`
+- Create: `com.newsvibe.digest.plist`
 
 - [ ] **Step 1: Создать плист**
 
-Create `com.mrdi.newsvibe.plist`:
+Create `com.newsvibe.digest.plist`:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-  <key>Label</key><string>com.mrdi.newsvibe</string>
+  <key>Label</key><string>com.newsvibe.digest</string>
   <key>ProgramArguments</key>
   <array>
     <string>/bin/bash</string>
-    <string>/Volumes/X10 Pro/projects/news_vibe_coding/run_digest.sh</string>
+    <string>~/news_vibe_coding/run_digest.sh</string>
   </array>
   <key>StartCalendarInterval</key>
   <dict>
@@ -586,9 +586,9 @@ Create `com.mrdi.newsvibe.plist`:
     <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
   </dict>
   <key>StandardOutPath</key>
-  <string>/Volumes/X10 Pro/projects/news_vibe_coding/digests/launchd.log</string>
+  <string>~/news_vibe_coding/digests/launchd.log</string>
   <key>StandardErrorPath</key>
-  <string>/Volumes/X10 Pro/projects/news_vibe_coding/digests/launchd.log</string>
+  <string>~/news_vibe_coding/digests/launchd.log</string>
   <key>RunAtLoad</key><false/>
 </dict>
 </plist>
@@ -596,22 +596,22 @@ Create `com.mrdi.newsvibe.plist`:
 
 - [ ] **Step 2: Провалидировать plist**
 
-Run: `plutil -lint "com.mrdi.newsvibe.plist"`
-Expected: `com.mrdi.newsvibe.plist: OK`
+Run: `plutil -lint "com.newsvibe.digest.plist"`
+Expected: `com.newsvibe.digest.plist: OK`
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add com.mrdi.newsvibe.plist
+git add com.newsvibe.digest.plist
 git commit -m "feat: add launchd agent for daily 08:00 run"
 ```
 
 > **Загрузка агента (вручную, НЕ в этом плане — после успешного прогона Task 8):**
 > ```bash
-> ln -sf "/Volumes/X10 Pro/projects/news_vibe_coding/com.mrdi.newsvibe.plist" \
->   ~/Library/LaunchAgents/com.mrdi.newsvibe.plist
-> launchctl unload ~/Library/LaunchAgents/com.mrdi.newsvibe.plist 2>/dev/null
-> launchctl load ~/Library/LaunchAgents/com.mrdi.newsvibe.plist
+> ln -sf "~/news_vibe_coding/com.newsvibe.digest.plist" \
+>   ~/Library/LaunchAgents/com.newsvibe.digest.plist
+> launchctl unload ~/Library/LaunchAgents/com.newsvibe.digest.plist 2>/dev/null
+> launchctl load ~/Library/LaunchAgents/com.newsvibe.digest.plist
 > ```
 
 ---
@@ -664,7 +664,7 @@ Expected (success criteria):
 
 Выполнить блок загрузки из Task 7. Проверить:
 ```bash
-launchctl list | grep com.mrdi.newsvibe
+launchctl list | grep com.newsvibe.digest
 ```
 Expected: строка с label (статус 0 = ок).
 

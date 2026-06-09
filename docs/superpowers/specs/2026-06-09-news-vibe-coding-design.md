@@ -42,7 +42,7 @@ news_vibe_coding/
 ├── .env.example             # шаблон без секретов
 ├── run_digest.sh            # раннер: цикл по темам → claude -p → агрегация → TG
 ├── notify_telegram.sh       # отправка дайджеста в Telegram
-├── com.mrdi.newsvibe.plist  # launchd, ежедневно 08:00
+├── com.newsvibe.digest.plist  # launchd, ежедневно 08:00
 ├── digests/
 │   └── 2026-06-09/
 │       ├── vibe-coding.md
@@ -114,7 +114,7 @@ curl -s "https://api.telegram.org/bot$TOKEN/sendDocument" \
   -F chat_id="$CHAT_ID" -F document=@"$DAILY"
 ```
 
-### com.mrdi.newsvibe.plist
+### com.newsvibe.digest.plist
 `launchd` с `StartCalendarInterval` (Hour 8, Minute 0). `RunAtLoad=false`.
 `StandardOutPath`/`StandardErrorPath` → `digests/launchd.log`.
 
