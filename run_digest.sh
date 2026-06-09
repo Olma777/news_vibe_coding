@@ -28,11 +28,29 @@ run_topic() {
   local brief="$outdir/$slug.md"
   claude -p "Use the last30days skill to research \"$name\" over the last 30 days. \
 Free sources only: Reddit, Hacker News, GitHub, YouTube, Polymarket. \
-Output a markdown brief with citations and a Best Takes section. \
-Save it to \"$brief\"" \
+Write the brief IN RUSSIAN (на русском языке): заголовки, текст и раздел Best Takes — по-русски; \
+цитаты/названия источников можно оставить в оригинале, все ссылки сохрани. \
+Save the markdown brief to \"$brief\"" \
     --allowedTools "Skill,Bash,WebFetch,WebSearch,Read,Write" \
-    --output-format text
+    --output-format text ${CLAUDE_EXTRA_FLAGS:-}
   [ -s "$brief" ]
+}
+
+# Сжимает дневные брифы в компактный читаемый дайджест для Telegram.
+# Русский, простой текст ≤3000 символов, голые ссылки (Telegram сам их линкует).
+# Гарантирует русскоязычный результат независимо от языка брифов скилла.
+summarize_telegram() {
+  local outdir="$1"
+  claude -p "Прочитай markdown-брифы тем в каталоге \"$outdir\" (все *.md, КРОМЕ _daily.md, _telegram.md и файлов с '-raw-' в имени). \
+Собери ОДИН компактный дайджест на русском языке для Telegram, не длиннее 3000 символов. \
+Формат строго простым текстом (без markdown, без #, без жирного, без таблиц): \
+первая строка '📰 News Vibe — $DATE'; пустая строка; затем по каждой теме блок из двух строк — \
+'• <Тема>: <1-2 предложения главного за месяц>' и на следующей строке одна ключевая ссылка голым URL. \
+Сохрани результат в \"$outdir/_telegram.md\"" \
+    --allowedTools "Bash,Read,Write" \
+    --output-format text ${CLAUDE_EXTRA_FLAGS:-}
+  # запасной вариант, если claude не записал файл
+  [ -s "$outdir/_telegram.md" ] || head -c 3000 "$outdir/_daily.md" > "$outdir/_telegram.md"
 }
 
 ok="$(run_all "$OUTDIR")"
@@ -44,6 +62,8 @@ if [ "$ok" -eq 0 ]; then
   tg_send_message "$TELEGRAM_BOT_TOKEN" "$TELEGRAM_CHAT_ID" \
     "⚠️ News Vibe: прогон $DATE провалился — все темы упали. См. run.log"
 else
-  ./notify_telegram.sh "$OUTDIR/_daily.md"
+  # компактный читаемый дайджест в чат + полный файл вложением
+  summarize_telegram "$OUTDIR"
+  ./notify_telegram.sh "$OUTDIR/_telegram.md" "$OUTDIR/_daily.md"
 fi
 echo "=== done ==="

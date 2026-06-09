@@ -37,7 +37,11 @@ TG_LIMIT=3500
 # Аргументы: TOKEN CHAT_ID TEXT.
 tg_send_message() {
   local token="$1" chat="$2" text="$3"
-  text="$(printf '%s' "$text" | cut -c1-"$TG_LIMIT")"
+  # Усечение до TG_LIMIT СИМВОЛОВ через весь текст (многострочный), UTF-8-safe.
+  # python3 надёжен и на macOS, и на ubuntu-CI; cut -c режет по строкам (баг),
+  # head -c режет по байтам (ломает кириллицу) — оба не годятся.
+  text="$(printf '%s' "$text" | TG_LIMIT="$TG_LIMIT" python3 -c \
+    'import os,sys; sys.stdout.write(sys.stdin.read()[:int(os.environ["TG_LIMIT"])])')"
   if [ "${DRY_RUN:-0}" = "1" ]; then
     printf 'DRYRUN sendMessage chat=%s len=%s\n' "$chat" "${#text}"
     return 0
