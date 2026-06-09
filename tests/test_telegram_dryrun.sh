@@ -5,8 +5,9 @@ source lib.sh
 
 export DRY_RUN=1
 
-# 5000 символов 'x' → должно обрезаться до 3500 в выводе len=
-long="$(head -c 5000 /dev/zero | tr '\0' x)"
+# 8000 кириллических символов → обрезается до 3500 знаков (не байт).
+# head -c обрезал бы по байтам (каждый кирилл. символ = 2 байта → len≠3500).
+long="$(python3 -c "print('тест'*2000, end='')")"
 out_msg="$(tg_send_message "TOK" "12345" "$long")"
 assert_contains "$out_msg" "DRYRUN sendMessage" "dry-run печатает sendMessage"
 assert_contains "$out_msg" "chat=12345" "правильный chat_id"

@@ -1,7 +1,9 @@
+# shellcheck shell=bash
 # Чистые функции обёртки. Сеть только в tg_* и только при DRY_RUN!=1.
 
 # Собирает сводный _daily.md из per-topic брифов, лежащих в OUTDIR/<slug>.md.
 # Темы без файла (упавшие) пропускаются. Аргументы: OUTDIR DATE.
+# Требует глобального массива TOPICS (source config.sh).
 aggregate_daily() {
   local outdir="$1" date="$2"
   local daily="$outdir/_daily.md"
@@ -35,7 +37,7 @@ TG_LIMIT=3500
 # Аргументы: TOKEN CHAT_ID TEXT.
 tg_send_message() {
   local token="$1" chat="$2" text="$3"
-  text="$(printf '%s' "$text" | head -c "$TG_LIMIT")"
+  text="$(printf '%s' "$text" | cut -c1-"$TG_LIMIT")"
   if [ "${DRY_RUN:-0}" = "1" ]; then
     printf 'DRYRUN sendMessage chat=%s len=%s\n' "$chat" "${#text}"
     return 0
@@ -70,17 +72,17 @@ run_topic() {
 
 # Прогон всех тем с per-topic isolation + 1 retry на тему.
 # Падение одной темы не рушит прогон. Печатает в stdout число успешных.
-# Аргумент: OUTDIR.
+# Аргумент: OUTDIR. Требует глобального массива TOPICS (source config.sh).
 run_all() {
   local outdir="$1" ok=0 e name slug
   for e in "${TOPICS[@]}"; do
     name="${e%%|*}"; slug="${e##*|}"
-    if run_topic "$slug" "$name" "$outdir"; then
+    if run_topic "$slug" "$name" "$outdir" >&2; then
       ok=$((ok+1))
     else
       echo "RETRY $slug" >&2
       sleep "$RETRY_SLEEP"
-      if run_topic "$slug" "$name" "$outdir"; then
+      if run_topic "$slug" "$name" "$outdir" >&2; then
         ok=$((ok+1))
       else
         echo "FAIL $slug" >&2

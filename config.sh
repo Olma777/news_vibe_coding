@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Темы дайджеста в формате "human name|slug". Slug → имя файла брифа.
 TOPICS=(
   "vibe coding|vibe-coding"

@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Минимальные assert-хелперы для bash-тестов (без внешних фреймворков).
 ASSERT_FAILS=0
 
