@@ -57,3 +57,35 @@ tg_send_document() {
     "https://api.telegram.org/bot$token/sendDocument" \
     -F chat_id="$chat" -F document=@"$file"
 }
+
+# Пауза между retry (сек). В тестах переопределяется RETRY_SLEEP=0.
+RETRY_SLEEP="${RETRY_SLEEP:-30}"
+
+# Дефолтная заглушка. Переопределяется в run_digest.sh (реальный claude)
+# и в тестах (мок). Существует, чтобы run_all всегда имел что вызвать.
+run_topic() {
+  echo "run_topic not implemented (override me)" >&2
+  return 99
+}
+
+# Прогон всех тем с per-topic isolation + 1 retry на тему.
+# Падение одной темы не рушит прогон. Печатает в stdout число успешных.
+# Аргумент: OUTDIR.
+run_all() {
+  local outdir="$1" ok=0 e name slug
+  for e in "${TOPICS[@]}"; do
+    name="${e%%|*}"; slug="${e##*|}"
+    if run_topic "$slug" "$name" "$outdir"; then
+      ok=$((ok+1))
+    else
+      echo "RETRY $slug" >&2
+      sleep "$RETRY_SLEEP"
+      if run_topic "$slug" "$name" "$outdir"; then
+        ok=$((ok+1))
+      else
+        echo "FAIL $slug" >&2
+      fi
+    fi
+  done
+  echo "$ok"
+}
