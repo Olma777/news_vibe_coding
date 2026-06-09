@@ -15,6 +15,9 @@ This repo wires that skill into a **scheduled pipeline**: every morning it resea
 fixed list of AI/coding topics, condenses them into one phone-readable digest, and pushes
 it to Telegram. Run it locally (macOS `launchd`) or in the cloud (GitHub Actions — free).
 
+📚 **Browse the archive:** https://olma777.github.io/news_vibe_coding/ — every daily digest,
+published automatically to GitHub Pages.
+
 ## What the digest looks like
 
 A single, scannable Telegram message — one takeaway + key link per topic:

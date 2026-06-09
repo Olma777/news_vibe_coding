@@ -29,6 +29,21 @@ lang_clause() {
   esac
 }
 
+# Регенерит индекс веб-архива: список дат (обратный хронологический) со ссылками.
+# Ссылки на .html — Jekyll на GitHub Pages конвертирует _daily.md → _daily.html.
+# Аргументы: DIGESTS_DIR INDEX_PATH.
+regen_index() {
+  local ddir="$1" index="$2" d
+  {
+    printf '# News Vibe — архив дайджестов\n\n'
+    printf 'Ежедневный дайджест AI/vibe-coding новостей. [О проекте](https://github.com/Olma777/news_vibe_coding).\n\n'
+    for d in $(ls -1 "$ddir" 2>/dev/null | sort -r); do
+      [ -d "$ddir/$d" ] || continue
+      printf -- '- [%s](digests/%s/_daily.html)\n' "$d" "$d"
+    done
+  } > "$index"
+}
+
 # Собирает сводный _daily.md из per-topic брифов, лежащих в OUTDIR/<slug>.md.
 # Темы без файла (упавшие) пропускаются. Аргументы: OUTDIR DATE.
 # Требует глобального массива TOPICS (source config.sh).

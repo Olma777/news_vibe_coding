@@ -73,6 +73,12 @@ else
     else
       ./notify_telegram.sh "$OUTDIR/_telegram_$L.md"
     fi
+    # опционально — публикация в публичный канал (если задан TELEGRAM_CHANNEL_ID)
+    [ -n "${TELEGRAM_CHANNEL_ID:-}" ] && \
+      tg_send_message "$TELEGRAM_BOT_TOKEN" "$TELEGRAM_CHANNEL_ID" "$(cat "$OUTDIR/_telegram_$L.md")"
   done
 fi
+
+# веб-архив (GitHub Pages): копируем дайджест в docs/ (коммит делает CI)
+./publish.sh "$OUTDIR" "$DATE" || echo "publish failed (non-fatal)"
 echo "=== done ==="
