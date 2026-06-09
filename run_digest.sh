@@ -30,7 +30,7 @@ run_topic() {
 Free sources only: Reddit, Hacker News, GitHub, YouTube, Polymarket. \
 Output a markdown brief with citations and a Best Takes section. \
 Save it to \"$brief\"" \
-    --allowedTools "Skill,Bash,WebFetch,Read,Write" \
+    --allowedTools "Skill,Bash,WebFetch,WebSearch,Read,Write" \
     --output-format text
   [ -s "$brief" ]
 }
