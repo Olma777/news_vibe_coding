@@ -27,3 +27,33 @@ aggregate_daily() {
     done
   } > "$daily"
 }
+
+# Telegram limit 4096 символов/сообщение; держим запас.
+TG_LIMIT=3500
+
+# Отправка текстового сообщения. DRY_RUN=1 → печать вместо сети.
+# Аргументы: TOKEN CHAT_ID TEXT.
+tg_send_message() {
+  local token="$1" chat="$2" text="$3"
+  text="$(printf '%s' "$text" | head -c "$TG_LIMIT")"
+  if [ "${DRY_RUN:-0}" = "1" ]; then
+    printf 'DRYRUN sendMessage chat=%s len=%s\n' "$chat" "${#text}"
+    return 0
+  fi
+  curl -s -o /dev/null -w '%{http_code}' \
+    "https://api.telegram.org/bot$token/sendMessage" \
+    -d chat_id="$chat" --data-urlencode "text=$text"
+}
+
+# Отправка файла-документа. DRY_RUN=1 → печать вместо сети.
+# Аргументы: TOKEN CHAT_ID FILEPATH.
+tg_send_document() {
+  local token="$1" chat="$2" file="$3"
+  if [ "${DRY_RUN:-0}" = "1" ]; then
+    printf 'DRYRUN sendDocument chat=%s file=%s\n' "$chat" "$file"
+    return 0
+  fi
+  curl -s -o /dev/null -w '%{http_code}' \
+    "https://api.telegram.org/bot$token/sendDocument" \
+    -F chat_id="$chat" -F document=@"$file"
+}
