@@ -1,6 +1,34 @@
 # shellcheck shell=bash
 # Чистые функции обёртки. Сеть только в tg_* и только при DRY_RUN!=1.
 
+# Язык дайджеста: ru | en | both. Канонически задаётся в config.sh; здесь — дефолт.
+DIGEST_LANG="${DIGEST_LANG:-ru}"
+
+# Языки доставки в Telegram: на каких языках слать дайджест.
+lang_targets() {
+  case "$DIGEST_LANG" in
+    both) echo "ru en" ;;
+    en)   echo "en" ;;
+    *)    echo "ru" ;;
+  esac
+}
+
+# Язык брифов тем: для both берём en как нейтральную базу (summarize переведёт).
+brief_lang() {
+  case "$DIGEST_LANG" in
+    en|both) echo "en" ;;
+    *)       echo "ru" ;;
+  esac
+}
+
+# Инструкция языка вывода для промпта claude. Аргумент: ru | en.
+lang_clause() {
+  case "$1" in
+    en) echo "Write the result in English." ;;
+    *)  echo "Пиши результат на русском языке." ;;
+  esac
+}
+
 # Собирает сводный _daily.md из per-topic брифов, лежащих в OUTDIR/<slug>.md.
 # Темы без файла (упавшие) пропускаются. Аргументы: OUTDIR DATE.
 # Требует глобального массива TOPICS (source config.sh).

@@ -28,7 +28,7 @@ run_topic() {
   local brief="$outdir/$slug.md"
   claude -p "Use the last30days skill to research \"$name\" over the last 30 days. \
 Free sources only: Reddit, Hacker News, GitHub, YouTube, Polymarket. \
-Write the brief IN RUSSIAN (на русском языке): заголовки, текст и раздел Best Takes — по-русски; \
+$(lang_clause "$(brief_lang)") Заголовки, текст и раздел Best Takes — на этом языке; \
 цитаты/названия источников можно оставить в оригинале, все ссылки сохрани. \
 Save the markdown brief to \"$brief\"" \
     --allowedTools "Skill,Bash,WebFetch,WebSearch,Read,Write" \
@@ -36,21 +36,22 @@ Save the markdown brief to \"$brief\"" \
   [ -s "$brief" ]
 }
 
-# Сжимает дневные брифы в компактный читаемый дайджест для Telegram.
-# Русский, простой текст ≤3000 символов, голые ссылки (Telegram сам их линкует).
-# Гарантирует русскоязычный результат независимо от языка брифов скилла.
+# Сжимает дневные брифы в компактный читаемый дайджест для Telegram на языке LANG.
+# Простой текст ≤3000 символов, голые ссылки (Telegram сам их линкует).
+# Пишет в _telegram_<lang>.md. Аргументы: OUTDIR LANG(ru|en).
 summarize_telegram() {
-  local outdir="$1"
-  claude -p "Прочитай markdown-брифы тем в каталоге \"$outdir\" (все *.md, КРОМЕ _daily.md, _telegram.md и файлов с '-raw-' в имени). \
-Собери ОДИН компактный дайджест на русском языке для Telegram, не длиннее 3000 символов. \
+  local outdir="$1" lang="${2:-ru}"
+  local out="$outdir/_telegram_$lang.md"
+  claude -p "Прочитай markdown-брифы тем в каталоге \"$outdir\" (все *.md, КРОМЕ _daily.md, файлов _telegram_* и файлов с '-raw-' в имени). \
+Собери ОДИН компактный дайджест для Telegram, не длиннее 3000 символов. $(lang_clause "$lang") \
 Формат строго простым текстом (без markdown, без #, без жирного, без таблиц): \
 первая строка '📰 News Vibe — $DATE'; пустая строка; затем по каждой теме блок из двух строк — \
 '• <Тема>: <1-2 предложения главного за месяц>' и на следующей строке одна ключевая ссылка голым URL. \
-Сохрани результат в \"$outdir/_telegram.md\"" \
+Сохрани результат в \"$out\"" \
     --allowedTools "Bash,Read,Write" \
     --output-format text ${CLAUDE_EXTRA_FLAGS:-}
   # запасной вариант, если claude не записал файл
-  [ -s "$outdir/_telegram.md" ] || head -c 3000 "$outdir/_daily.md" > "$outdir/_telegram.md"
+  [ -s "$out" ] || head -c 3000 "$outdir/_daily.md" > "$out"
 }
 
 ok="$(run_all "$OUTDIR")"
@@ -62,8 +63,16 @@ if [ "$ok" -eq 0 ]; then
   tg_send_message "$TELEGRAM_BOT_TOKEN" "$TELEGRAM_CHAT_ID" \
     "⚠️ News Vibe: прогон $DATE провалился — все темы упали. См. run.log"
 else
-  # компактный читаемый дайджест в чат + полный файл вложением
-  summarize_telegram "$OUTDIR"
-  ./notify_telegram.sh "$OUTDIR/_telegram.md" "$OUTDIR/_daily.md"
+  # на каждый язык — компактный дайджест в чат; полный файл вкладываем один раз
+  first=1
+  for L in $(lang_targets); do
+    summarize_telegram "$OUTDIR" "$L"
+    if [ "$first" = 1 ]; then
+      ./notify_telegram.sh "$OUTDIR/_telegram_$L.md" "$OUTDIR/_daily.md"
+      first=0
+    else
+      ./notify_telegram.sh "$OUTDIR/_telegram_$L.md"
+    fi
+  done
 fi
 echo "=== done ==="

@@ -62,6 +62,8 @@ if every topic fails, an alert is sent instead.
 - **Topics** (edit in [`config.sh`](config.sh)): `vibe coding`, `Claude Code`, `AI agents`,
   `LLM research`, `Cursor`, `Codex`.
 - **Sources** (free, no API keys): Reddit · Hacker News · GitHub · YouTube · Polymarket.
+- **Language** (`DIGEST_LANG` in [`config.sh`](config.sh)): `ru` | `en` | `both` — get the
+  digest in Russian, English, or both versions side by side.
 
 ## Setup
 
