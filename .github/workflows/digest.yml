@@ -1,0 +1,58 @@
+name: news-digest
+
+# Облачный ежедневный дайджест. Не зависит от локального компа.
+# 06:00 UTC ≈ 08:00–09:00 Europe (Кишинёв/Киев). Плюс ручной запуск кнопкой.
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+# Не запускать параллельно сам с собой.
+concurrency:
+  group: news-digest
+  cancel-in-progress: false
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      # Гейты разрешений НЕ отключаем. headless `claude -p` + --allowedTools =
+      # default-deny: вне allowlist тулзы авто-отклоняются (без зависания на промпте).
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install yt-dlp
+        run: |
+          python3 -m pip install --user --upgrade yt-dlp
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Install last30days skill
+        run: |
+          claude plugin marketplace add mvanhorn/last30days-skill
+          claude plugin install last30days@last30days-skill
+          claude plugin list
+
+      - name: Run digest
+        run: bash ./run_digest.sh
+
+      - name: Upload daily digest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-digest
+          path: |
+            digests/**/_daily.md
+            digests/**/run.log
+          if-no-files-found: warn
+          retention-days: 30
