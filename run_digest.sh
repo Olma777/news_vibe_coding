@@ -25,13 +25,14 @@ export LAST30DAYS_MEMORY_DIR="$OUTDIR"
 # Успех = непустой файл брифа.
 run_topic() {
   local slug="$1" name="$2" outdir="$3"
+  local brief="$outdir/$slug.md"
   claude -p "Use the last30days skill to research \"$name\" over the last 30 days. \
 Free sources only: Reddit, Hacker News, GitHub, YouTube, Polymarket. \
 Output a markdown brief with citations and a Best Takes section. \
-Save it to $outdir/$slug.md" \
+Save it to \"$brief\"" \
     --allowedTools "Skill,Bash,WebFetch,Read,Write" \
     --output-format text
-  [ -s "$outdir/$slug.md" ]
+  [ -s "$brief" ]
 }
 
 ok="$(run_all "$OUTDIR")"

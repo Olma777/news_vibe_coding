@@ -21,9 +21,9 @@
     <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
   </dict>
   <key>StandardOutPath</key>
-  <string>/Volumes/X10 Pro/projects/news_vibe_coding/digests/launchd.log</string>
+  <string>/tmp/com.mrdi.newsvibe.log</string>
   <key>StandardErrorPath</key>
-  <string>/Volumes/X10 Pro/projects/news_vibe_coding/digests/launchd.log</string>
+  <string>/tmp/com.mrdi.newsvibe.log</string>
   <key>RunAtLoad</key><false/>
 </dict>
 </plist>
