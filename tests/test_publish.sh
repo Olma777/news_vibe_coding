@@ -11,7 +11,7 @@ regen_index "$ROOT/digests" "$ROOT/index.md"
 
 assert_file_contains "$ROOT/index.md" "2026-06-09" "индекс содержит свежую дату"
 assert_file_contains "$ROOT/index.md" "2026-06-07" "индекс содержит старую дату"
-assert_file_contains "$ROOT/index.md" "digests/2026-06-09/_daily.html" "ссылка на .html (Jekyll)"
+assert_file_contains "$ROOT/index.md" "digests/2026-06-09/" "ссылка на каталог даты (Jekyll index.html)"
 
 # обратный хронологический порядок: 09 раньше 07 в файле
 line09="$(grep -n '2026-06-09' "$ROOT/index.md" | head -1 | cut -d: -f1)"

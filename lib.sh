@@ -39,7 +39,7 @@ regen_index() {
     printf 'Ежедневный дайджест AI/vibe-coding новостей. [О проекте](https://github.com/Olma777/news_vibe_coding).\n\n'
     for d in $(ls -1 "$ddir" 2>/dev/null | sort -r); do
       [ -d "$ddir/$d" ] || continue
-      printf -- '- [%s](digests/%s/_daily.html)\n' "$d" "$d"
+      printf -- '- [%s](digests/%s/)\n' "$d" "$d"
     done
   } > "$index"
 }

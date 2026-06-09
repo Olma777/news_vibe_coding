@@ -2,4 +2,4 @@
 
 Ежедневный дайджест AI/vibe-coding новостей. [О проекте](https://github.com/Olma777/news_vibe_coding).
 
-- [2026-06-09](digests/2026-06-09/_daily.html)
+- [2026-06-09](digests/2026-06-09/)
