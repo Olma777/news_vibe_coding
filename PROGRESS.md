@@ -1,17 +1,15 @@
 ---
 project: news_vibe_coding
-head: e4104ed
+head: 6903476
 tests: "bash 5/5"
-status: "code complete; pending Task 8 (skill install + .env secrets + first real run + launchd load)"
+status: "MVP в продакшене: облачный GitHub Actions прогон green end-to-end (run 27207760831, success 13:31), дайджест доставлен в Telegram. Репо public OSS."
 last_session: "2026-06-09"
 next_actions:
-  - "Установить скилл: /plugin marketplace add mvanhorn/last30days-skill"
-  - "brew install yt-dlp node (тулзы скилла)"
-  - "cp .env.example .env + заполнить TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID"
-  - "Dry-run доставки: ./notify_telegram.sh на фейковом _daily.md"
-  - "Полный прогон: ./run_digest.sh — проверить файлы тем + _daily.md + Telegram"
-  - "Загрузить launchd-агент (Task 7 блок), launchctl list | grep newsvibe"
-  - "Настроить remote: gh repo create Olma777/news_vibe_coding --private, push"
+  - "Pack #1: языковой переключатель DIGEST_LANG (ru/en/both)"
+  - "Pack #2: персистентность дайджестов + публичный канал + web-архив (GitHub Pages)"
+  - "Pack #3: богаче подача в TG (по теме отдельное сообщение + Best Takes + inline-кнопки)"
+  - "Pack #4: итоги недели (понедельничный cron, агрегация 7 дней)"
+  - "Pack #5: трекинг трендов (--store SQLite, коммит БД для персистентности)"
 links:
   spec: "docs/superpowers/specs/2026-06-09-news-vibe-coding-design.md"
   plan: "docs/superpowers/plans/2026-06-09-news-vibe-coding.md"
